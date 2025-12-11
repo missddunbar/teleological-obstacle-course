@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teleological Obstacle Course</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #1e3c72;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+        
+        .theory-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .theory-box h2 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        
+        .course-container {
+            position: relative;
+            height: 600px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 50%, #90EE90 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid #1e3c72;
+        }
+        
+        /* Ground/Path */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to bottom, #8B4513 0%, #654321 100%);
+            border-top: 3px solid #A0522D;
+        }
+        
+        .path {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: repeating-linear-gradient(
+                90deg,
+                #FFD700,
+                #FFD700 20px,
+                #FFA500 20px,
+                #FFA500 40px
+            );
+            animation: pathMove 2s linear infinite;
+        }
+        
+        @keyframes pathMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 0; }
+        }
+        
+        /* Runner Character */
+        .runner {
+            position: absolute;
+            bottom: 120px;
+            left: 50px;
+            width: 60px;
+            height: 80px;
+            z-index: 100;
+            animation: run 1s steps(2) infinite;
+        }
+        
+        .runner-body {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            background: #4A90E2;
+            border-radius: 10px;
+            left: 10px;
+            top: 20px;
+        }
+        
+        .runner-head {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background: #FFD1A4;
+            border-radius: 50%;
+            left: 12px;
+            top: 0;
+        }
+        
+        .runner-leg {
+            position: absolute;
+            width: 15px;
+            height: 30px;
+            background: #2E5C8A;
+            bottom: 0;
+        }
+        
+        .runner-leg.left {
+            left: 15px;
+            animation: legMove 0.5s ease-in-out infinite;
+        }
+        
+        .runner-leg.right {
+            left: 30px;
+            animation: legMove 0.5s ease-in-out infinite reverse;
+        }
+        
+        @keyframes legMove {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(20deg); }
+        }
+        
+        @keyframes run {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        /* Obstacles */
+        .obstacle {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .obstacle:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+        
+        /* Barrier 1 - Closed Access */
+        .barrier1 {
+            bottom: 120px;
+            left: 200px;
+            width: 100px;
+            height: 150px;
+        }
+        
+        .wall {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #8B0000, #DC143C);
+            border: 3px solid #4A0000;
+            border-radius: 5px;
+            position: relative;
+            animation: shake 2s ease-in-out infinite;
+        }
+        
+        .wall::before {
+            content: '🚫';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+        
+        .barrier1.overcome .wall {
+            animation: fallDown 1s ease-in forwards;
+        }
+        
+        @keyframes fallDown {
+            to {
+                transform: translateY(200px) rotate(90deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Solution 1 - Open Access */
+        .solution1 {
+            bottom: 120px;
+            left: 200px;
+            width: 100px;
+            height: 150px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .solution1.active {
+            animation: riseUp 1s ease-out forwards;
+            pointer-events: all;
+        }
+        
+        @keyframes riseUp {
+            from {
+                transform: translateY(200px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .open-gate {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #32CD32, #228B22);
+            border: 3px solid #006400;
+            border-radius: 5px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+        
+        .open-gate::before {
+            content: '✅';
+        }
+        
+        /* Barrier 2 - No Academic Support */
+        .barrier2 {
+            bottom: 120px;
+            left: 450px;
+            width: 120px;
+            height: 180px;
+        }
+        
+        .cliff {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #696969, #2F4F4F);
+            border: 3px solid #000;
+            border-radius: 5px;
+            position: relative;
+            animation: wobble 3s ease-in-out infinite;
+        }
+        
+        .cliff::before {
+            content: '⚠️';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+        }
+        
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(2deg); }
+            75% { transform: rotate(-2deg); }
+        }
+        
+        .barrier2.overcome .cliff {
+            animation: crumble 1s ease-in forwards;
+        }
+        
+        @keyframes crumble {
+            to {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Solution 2 - Academic Supports */
+        .solution2 {
+            bottom: 120px;
+            left: 450px;
+            width: 120px;
+            height: 180px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .solution2.active {
+            animation: buildBridge 1s ease-out forwards;
+            pointer-events: all;
+        }
+        
+        @keyframes buildBridge {
+            from {
+                transform: scaleX(0);
+                opacity: 0;
+            }
+            to {
+                transform: scaleX(1);
+                opacity: 1;
+            }
+        }
+        
+        .bridge {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to right, #8B4513, #A0522D);
+            border: 3px solid #654321;
+            border-radius: 5px;
+            position: absolute;
+            bottom: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+        
+        .bridge::before {
+            content: '📚';
+        }
+        
+        /* Barrier 3 - Lack of Coordination */
+        .barrier3 {
+            bottom: 120px;
+            left: 750px;
+            width: 140px;
+            height: 160px;
+        }
+        
+        .maze {
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                #4B0082,
+                #4B0082 10px,
+                #8A2BE2 10px,
+                #8A2BE2 20px
+            );
+            border: 3px solid #2E0854;
+            border-radius: 5px;
+            position: relative;
+            animation: spin 4s linear infinite;
+        }
+        
+        .maze::before {
+            content: '❓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            animation: none;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .barrier3.overcome .maze {
+            animation: explode 1s ease-in forwards;
+        }
+        
+        @keyframes explode {
+            to {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+        
+        /* Solution 3 - Coordinator */
+        .solution3 {
+            bottom: 120px;
+            left: 750px;
+            width: 140px;
+            height: 160px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .solution3.active {
+            animation: appear 1s ease-out forwards;
+            pointer-events: all;
+        }
+        
+        @keyframes appear {
+            from {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        
+        .coordinator {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #FF6B6B, #FF8E8E);
+            border: 3px solid #CC0000;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .coordinator::before {
+            content: '👨‍🏫';
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Barrier 4 - No Study Support */
+        .barrier4 {
+            bottom: 120px;
+            left: 1050px;
+            width: 100px;
+            height: 140px;
+        }
+        
+        .quicksand {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #D2B48C, #F4A460);
+            border: 3px solid #CD853F;
+            border-radius: 5px;
+            position: relative;
+            animation: bubble 2s ease-in-out infinite;
+        }
+        
+        .quicksand::before {
+            content: '⏳';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+        }
+        
+        @keyframes bubble {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .barrier4.overcome .quicksand {
+            animation: drain 1s ease-in forwards;
+        }
+        
+        @keyframes drain {
+            to {
+                transform: translateY(150px);
+                opacity: 0;
+            }
+        }
+        
+        /* Solution 4 - Study Hall */
+        .solution4 {
+            bottom: 120px;
+            left: 1050px;
+            width: 100px;
+            height: 140px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .solution4.active {
+            animation: construct 1s ease-out forwards;
+            pointer-events: all;
+        }
+        
+        @keyframes construct {
+            from {
+                transform: translateY(-200px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .study-hall {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #4169E1, #1E90FF);
+            border: 3px solid #00008B;
+            border-radius: 5px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+        
+        .study-hall::before {
+            content: '📖';
+        }
+        
+        /* Goal */
+        .goal {
+            position: absolute;
+            bottom: 120px;
+            right: 50px;
+            width: 150px;
+            height: 200px;
+        }
+        
+        .trophy {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #FFD700, #FFA500);
+            border: 3px solid #DAA520;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: shine 2s ease-in-out infinite;
+        }
+        
+        .trophy::before {
+            content: '🏆';
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+        
+        .trophy-text {
+            color: #8B4513;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 5px;
+        }
+        
+        @keyframes shine {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+        }
+        
+        /* Info Tooltips */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            width: 250px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .tooltip.show {
+            opacity: 1;
+        }
+        
+        .tooltip h4 {
+            color: #FFD700;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .tooltip p {
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        /* Controls */
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .progress {
+            margin-top: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .progress h3 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #ddd;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .legend {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .legend-icon {
+            font-size: 2em;
+        }
+        
+        .legend-text {
+            font-size: 0.9em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Teleological Obstacle Course 🎯</h1>
+            <p><strong>Goal-Oriented Approach to Student Success</strong></p>
+            <p>Students with Disabilities in Dual Enrollment Programs</p>
+        </div>
+        
+        <div class="theory-box">
+            <h2>📖 Teleological Theory</h2>
+            <p>A goal-directed approach where actions are judged by their outcomes. Each intervention is designed with the <strong>ultimate goal</strong> in mind: successful college enrollment and degree completion for students with disabilities.</p>
+        </div>
+        
+        <div class="course-container">
+            <!-- Runner -->
+            <div class="runner">
+                <div class="runner-head"></div>
+                <div class="runner-body"></div>
+                <div class="runner-leg left"></div>
+                <div class="runner-leg right"></div>
+            </div>
+            
+            <!-- Obstacle 1: Closed Access -->
+            <div class="obstacle barrier1" data-obstacle="1">
+                <div class="wall"></div>
+            </div>
+            <div class="obstacle solution1" data-solution="1">
+                <div class="open-gate"></div>
+            </div>
+            
+            <!-- Obstacle 2: No Academic Support -->
+            <div class="obstacle barrier2" data-obstacle="2">
+                <div class="cliff"></div>
+            </div>
+            <div class="obstacle solution2" data-solution="2">
+                <div class="bridge"></div>
+            </div>
+            
+            <!-- Obstacle 3: Lack of Coordination -->
+            <div class="obstacle barrier3" data-obstacle="3">
+                <div class="maze"></div>
+            </div>
+            <div class="obstacle solution3" data-solution="3">
+                <div class="coordinator"></div>
+            </div>
+            
+            <!-- Obstacle 4: No Study Support -->
+            <div class="obstacle barrier4" data-obstacle="4">
+                <div class="quicksand"></div>
+            </div>
+            <div class="obstacle solution4" data-solution="4">
+                <div class="study-hall"></div>
+            </div>
+            
+            <!-- Goal -->
+            <div class="goal">
+                <div class="trophy">
+                    <div class="trophy-text">College Success!</div>
+                </div>
+            </div>
+            
+            <!-- Path -->
+            <div class="path"></div>
+            <div class="ground"></div>
+            
+            <!-- Tooltips -->
+            <div class="tooltip" id="tooltip"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="startBtn">🚀 Start Journey</button>
+            <button class="btn" id="overcomeBtn" disabled>✅ Overcome Obstacle</button>
+            <button class="btn" id="resetBtn">🔄 Reset Course</button>
+        </div>
+        
+        <div class="progress">
+            <h3>Progress Toward Goal: College Enrollment & Success</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-icon">🚫</div>
+                <div class="legend-text"><strong>Barrier:</strong> Closed/Restricted Access</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">✅</div>
+                <div class="legend-text"><strong>Solution:</strong> Open Access for All</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">⚠️</div>
+                <div class="legend-text"><strong>Barrier:</strong> Lack of Academic Support</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">📚</div>
+                <div class="legend-text"><strong>Solution:</strong> UDL & Accommodations</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">❓</div>
+                <div class="legend-text"><strong>Barrier:</strong> Poor Coordination</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">👨‍🏫</div>
+                <div class="legend-text"><strong>Solution:</strong> Dual Enrollment Coordinator</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">⏳</div>
+                <div class="legend-text"><strong>Barrier:</strong> Insufficient Study Time</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">📖</div>
+                <div class="legend-text"><strong>Solution:</strong> Dedicated Study Hall</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentObstacle = 0;
+        const totalObstacles = 4;
+        let journeyStarted = false;
+        
+        const startBtn = document.getElementById('startBtn');
+        const overcomeBtn = document.getElementById('overcomeBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const progressFill = document.getElementById('progressFill');
+        const tooltip = document.getElementById('tooltip');
+        
+        const obstacleInfo = {
+            1: {
+                barrier: {
+                    title: "🚫 Barrier: Closed Access",
+                    description: "Students with disabilities are excluded through GPA requirements, teacher recommendations, and lack of information about dual enrollment opportunities."
+                },
+                solution: {
+                    title: "✅ Solution: Open Access for All",
+                    description: "Eliminate barriers. Presumption of competence. Universal recruitment. Include dual enrollment in all IEP transition plans starting at age 14."
+                }
+            },
+            2: {
+                barrier: {
+                    title: "⚠️ Barrier: No Academic Support",
+                    description: "Students lack accommodations, assistive technology, and instructional supports needed to succeed in rigorous college-level coursework."
+                },
+                solution: {
+                    title: "📚 Solution: Academic Supports",
+                    description: "Universal Design for Learning (UDL). IEP/504 accommodations in dual enrollment courses. Assistive technology. Peer tutoring. Faculty training."
+                }
+            },
+            3: {
+                barrier: {
+                    title: "❓ Barrier: Lack of Coordination",
+                    description: "Special education and dual enrollment offices work in silos. Students fall through the cracks between systems. No one owns their success."
+                },
+                solution: {
+                    title: "👨‍🏫 Solution: Dual Enrollment Coordinator",
+                    description: "Dedicated coordinator bridges systems. Connects IEP accommodations to college disability services. Monitors progress. Advocates for students."
+                }
+            },
+            4: {
+                barrier: {
+                    title: "⏳ Barrier: Insufficient Study Time",
+                    description: "Students struggle to balance dual enrollment coursework with other responsibilities. Lack structured time and space for academic work."
+                },
+                solution: {
+                    title: "📖 Solution: Dedicated Study Hall",
+                    description: "Built-in study time during school day. Peer support. Access to tutoring. Quiet space with resources. Reduces outside-of-school burden."
+                }
+            }
+        };
+        
+        // Tooltip functionality
+        document.querySelectorAll('.obstacle').forEach(obstacle => {
+            obstacle.addEventListener('mouseenter', function(e) {
+                const obstacleNum = this.dataset.obstacle || this.dataset.solution;
+                const isSolution = this.dataset.solution !== undefined;
+                const info = isSolution ? 
+                    obstacleInfo[obstacleNum].solution : 
+                    obstacleInfo[obstacleNum].barrier;
+                
+                tooltip.innerHTML = `<h4>${info.title}</h4><p>${info.description}</p>`;
+                tooltip.classList.add('show');
+                
+                const rect = this.getBoundingClientRect();
+                const containerRect = document.querySelector('.course-container').getBoundingClientRect();
+                
+                tooltip.style.left = (rect.left - containerRect.left) + 'px';
+                tooltip.style.top = (rect.top - containerRect.top - 100) + 'px';
+            });
+            
+            obstacle.addEventListener('mouseleave', function() {
+                tooltip.classList.remove('show');
+            });
+        });
+        
+        // Start journey
+        startBtn.addEventListener('click', function() {
+            if (!journeyStarted) {
+                journeyStarted = true;
+                currentObstacle = 1;
+                startBtn.disabled = true;
+                overcomeBtn.disabled = false;
+                updateProgress();
+            }
+        });
+        
+        // Overcome obstacle
+        overcomeBtn.addEventListener('click', function() {
+            if (currentObstacle <= totalObstacles) {
+                // Remove barrier
+                const barrier = document.querySelector(`.barrier${currentObstacle}`);
+                barrier.classList.add('overcome');
+                
+                // Show solution
+                setTimeout(() => {
+                    const solution = document.querySelector(`.solution${currentObstacle}`);
+                    solution.classList.add('active');
+                }, 1000);
+                
+                // Update progress
+                setTimeout(() => {
+                    currentObstacle++;
+                    updateProgress();
+                    
+                    if (currentObstacle > totalObstacles) {
+                        overcomeBtn.disabled = true;
+                        setTimeout(() => {
+                            alert('🎉 Success! You have overcome all barriers and reached the goal of college enrollment and success for students with disabilities!');
+                        }, 1500);
+                    }
+                }, 2000);
+            }
+        });
+        
+        // Reset
+        resetBtn.addEventListener('click', function() {
+            location.reload();
+        });
+        
+        // Update progress
+        function updateProgress() {
+            const progress = ((currentObstacle - 1) / totalObstacles) * 100;
+            progressFill.style.width = progress + '%';
+            progressFill.textContent = Math.round(progress) + '%';
+        }
+    </script>
+</body>
+</html>
